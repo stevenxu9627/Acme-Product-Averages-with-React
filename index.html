@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      src="https://unpkg.com/react@16/umd/react.development.js"
+      crossorigin
+    ></script>
+    <script
+      src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"
+      crossorigin
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.js"
+      crossorigin
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/react-router-dom/5.1.2/react-router-dom.js"
+      crossorigin=""
+    ></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.js'></script>
+    <style>
+    nav {
+      width: 100%;
+    }
+    </style>
+    </head>
+    <body>
+        <h1>Acme ProductAverages with React</h1>
+        <div id='root'></div>
+        <script type = 'text/babel'>
+        const { Component } = React;
+        const { render } = ReactDOM;
+        const { HashRouter, Route, Switch, Link, Redirect } = ReactRouterDOM;
+        const root = document.getElementById('root');
+        const API = "https://acme-users-api-rev.herokuapp.com/api";
+
+
+        const Nav = (props) => {
+            const path = props.location.pathname;
+            console.log(props);
+            return (
+              <nav className="navbar navbar-dark bg-dark">
+                <Link to='/home' className = {path === 'home' ? 'selected': ''}>
+                Home
+                </Link>
+                <Link to='/products' className = {path === 'home' ? 'selected': ''}>
+                Products
+                </Link>
+              </nav>
+            );
+        };
+        const home = ({products, offerings, companies }) => {
+          const id = products.id
+          const offer = offerings.filter(offer => offerings.productId === id);        
+          const avgprice = (amountProd.reduce((total, offer) => {
+            total += offer.price;
+            return total;
+           }, 0) / amountProd.length
+         ). toFixed(2);
+         return (
+           <div>
+            <h2>Home></h2>
+            <p> {`We have ${products.length} products with an average price of ${avgprice}`}</p>
+           </div>
+         )
+        }
+
+        // const lowestprice = (props) => {
+
+        // }
+
+        class App extends Component {
+          constructor() {
+            super();
+            this.state = {
+              products: [],
+              offerings: [],
+              companies: []
+            };
+          }
+          componentDidMount() {
+            const products = fetch(`https://www.acme-api.com/api/products`);
+            const offerings = fetch("https://www.acme-api.com/api/offerings");
+            const companies = fetch("https://www.acme-api.com/api/companies");
+            Promise.all([products, offerings, companies]).then(responses => {
+              return Promise.all(responses.map(res => res.json())).then(datas => {
+                const [products, offerings, companies] = datas;
+                this.setState({ products, offerings, companies });
+              });
+            });
+          }
+        render() {
+          const { products, companies, offerings } = this.state;
+            return (
+               <HashRouter>
+               <Route render={(props) => <Nav path={props.location.pathname}/>}/>
+               <Switch>
+               <Route path='/home' render={() => <Home products={products} companies={companies} offerings={offerings}/>}/>
+               <Route path='/products' render={() => <Products products={products} companies={ companies} offerings={offerings}/>}/>
+               <Redirect to='/home' />
+               </Switch>
+               </HashRouter>
+            )
+        }
+      }
+    render(<App />, root);
+
+        
+        
+        </script>
+    </body>
+</html>
